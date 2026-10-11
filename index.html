@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OzTech — Öz Teknoloji</title>
+<meta name="description" content="OzTech (Öz Teknoloji): restoran markaları için dijital operasyon, web tasarım ve yapay zekâ destekli müşteri iletişimi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#101418; --paper:#F4F6F5; --mint:#1F8A70; --line:#D5DBD8; --muted:#5B6660; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:'Space Grotesk',system-ui,sans-serif; line-height:1.55; }
+  .wrap { max-width:1040px; margin:0 auto; padding:0 24px; }
+  header { padding:28px 0; display:flex; justify-content:space-between; align-items:center; }
+  .logo { font-weight:700; font-size:22px; letter-spacing:-0.02em; }
+  .logo span { color:var(--mint); }
+  nav a { color:var(--muted); text-decoration:none; margin-left:20px; font-size:15px; }
+  .hero { padding:72px 0 64px; border-bottom:1px solid var(--line); }
+  .hero h1 { font-size:clamp(36px,6vw,64px); line-height:1.05; letter-spacing:-0.03em; margin:0 0 20px; max-width:16ch; }
+  .hero p { font-size:19px; color:var(--muted); max-width:56ch; margin:0 0 32px; }
+  .btn { display:inline-block; background:var(--ink); color:var(--paper); padding:14px 22px; border-radius:6px; text-decoration:none; font-weight:500; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:0; border-left:1px solid var(--line); margin:56px 0; }
+  .grid div { padding:24px; border-right:1px solid var(--line); }
+  .grid h2 { font-size:18px; margin:0 0 8px; }
+  .grid p { margin:0; color:var(--muted); font-size:15px; }
+  .contact { padding:48px 0 72px; }
+  .contact h2 { font-size:28px; margin:0 0 12px; letter-spacing:-0.02em; }
+  .contact p { color:var(--muted); margin:4px 0; }
+  .contact a { color:var(--mint); }
+  footer { border-top:1px solid var(--line); padding:24px 0; font-size:14px; color:var(--muted); }
+  footer a { color:var(--muted); }
+  a:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">Oz<span>Tech</span></div>
+    <nav><a href="#hizmetler">Hizmetler</a><a href="#iletisim">İletişim</a><a href="gizlilik.html">Gizlilik</a></nav>
+  </header>
+
+  <section class="hero">
+    <h1>Restoranınızın dijital tarafını biz yönetelim.</h1>
+    <p>OzTech (Öz Teknoloji), yemek siparişi platformlarında satış yapan restoran markalarına web tasarım, platform yönetimi ve yapay zekâ destekli müşteri iletişimi sunar.</p>
+    <a class="btn" href="#iletisim">Bizimle iletişime geçin</a>
+  </section>
+
+  <section id="hizmetler" class="grid">
+    <div><h2>Platform yönetimi</h2><p>Yemeksepeti, Trendyol Yemek ve Migros Yemek'te menü, fiyat, kampanya ve reklam takibi.</p></div>
+    <div><h2>Web tasarım</h2><p>İşletmeler için hızlı, mobil uyumlu ve sade web siteleri.</p></div>
+    <div><h2>Müşteri iletişimi</h2><p>WhatsApp üzerinden sipariş ve destek taleplerine hızlı, düzenli yanıt.</p></div>
+  </section>
+
+  <section id="iletisim" class="contact">
+    <h2>İletişim</h2>
+    <p>E-posta: <a href="mailto:ozgurcanozcanbusiness@gmail.com">ozgurcanozcanbusiness@gmail.com</a></p>
+    <p>Konum: İzmir, Türkiye</p>
+  </section>
+</div>
+<footer><div class="wrap">© 2026 OzTech · Öz Teknoloji · <a href="gizlilik.html">Gizlilik Politikası</a></div></footer>
+</body>
+</html>
