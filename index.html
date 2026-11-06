@@ -31,6 +31,24 @@
   footer { border-top:1px solid var(--line); padding:24px 0; font-size:14px; color:var(--muted); }
   footer a { color:var(--muted); }
   a:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
+
+  /* Sohbet asistanı */
+  .chat-toggle { position:fixed; right:20px; bottom:20px; z-index:50; background:var(--mint); color:#fff; border:0; border-radius:999px; padding:14px 20px; font:500 15px 'Space Grotesk',system-ui,sans-serif; cursor:pointer; box-shadow:0 6px 20px rgba(16,20,24,.18); }
+  .chat-toggle:focus-visible, .chat-panel button:focus-visible, .chat-panel textarea:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+  .chat-panel { position:fixed; right:20px; bottom:80px; z-index:50; width:min(380px, calc(100vw - 32px)); height:min(540px, calc(100vh - 110px)); background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 40px rgba(16,20,24,.18); display:flex; flex-direction:column; overflow:hidden; }
+  .chat-panel[hidden] { display:none; }
+  .chat-head { padding:14px 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-weight:700; }
+  .chat-head button { background:none; border:0; font-size:22px; line-height:1; cursor:pointer; color:var(--muted); }
+  .chat-log { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .msg { max-width:85%; padding:10px 12px; border-radius:10px; font-size:15px; white-space:pre-wrap; word-wrap:break-word; }
+  .msg.user { align-self:flex-end; background:var(--ink); color:var(--paper); }
+  .msg.assistant { align-self:flex-start; background:var(--paper); border:1px solid var(--line); }
+  .chat-form { display:flex; gap:8px; padding:12px; border-top:1px solid var(--line); }
+  .chat-form textarea { flex:1; resize:none; border:1px solid var(--line); border-radius:8px; padding:10px; font:15px 'Space Grotesk',system-ui,sans-serif; height:44px; }
+  .chat-form button { background:var(--ink); color:var(--paper); border:0; border-radius:8px; padding:0 16px; font:500 15px 'Space Grotesk',system-ui,sans-serif; cursor:pointer; }
+  .chat-form button:disabled { opacity:.5; cursor:default; }
+  .chat-note { font-size:12px; color:var(--muted); padding:0 12px 10px; margin:0; }
+  @media (max-width:480px) { .chat-toggle { right:16px; bottom:16px; } .chat-panel { right:16px; bottom:76px; } }
 </style>
 </head>
 <body>
@@ -58,6 +76,90 @@
     <p>Adres: Fatih Mah., Atatürk Blv. No: 141/D, 35700 Bergama / İzmir</p>
   </section>
 </div>
+<button class="chat-toggle" id="chatToggle" aria-expanded="false" aria-controls="chatPanel">Sohbet</button>
+<section class="chat-panel" id="chatPanel" role="dialog" aria-label="OzTech sohbet asistanı" hidden>
+  <div class="chat-head">OzTech Asistan <button type="button" id="chatClose" aria-label="Kapat">×</button></div>
+  <div class="chat-log" id="chatLog" aria-live="polite">
+    <div class="msg assistant">Merhaba! OzTech hizmetleriyle ilgili size nasıl yardımcı olabilirim?</div>
+  </div>
+  <form class="chat-form" id="chatForm">
+    <textarea id="chatInput" rows="1" maxlength="2000" placeholder="Mesajınızı yazın…" aria-label="Mesaj" required></textarea>
+    <button type="submit" id="chatSend">Gönder</button>
+  </form>
+  <p class="chat-note">Yapay zekâ asistanıdır; yanıtlar hatalı olabilir. Mesajlarınız yanıt üretmek için Anthropic'e iletilir. <a href="gizlilik.html">Gizlilik</a></p>
+</section>
+<script>
+(() => {
+  const toggle = document.getElementById('chatToggle');
+  const panel = document.getElementById('chatPanel');
+  const log = document.getElementById('chatLog');
+  const form = document.getElementById('chatForm');
+  const input = document.getElementById('chatInput');
+  const send = document.getElementById('chatSend');
+  const history = [];
+
+  function setOpen(open) {
+    panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    if (open) input.focus();
+  }
+  toggle.addEventListener('click', () => setOpen(panel.hidden));
+  document.getElementById('chatClose').addEventListener('click', () => { setOpen(false); toggle.focus(); });
+
+  function bubble(role, text) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + role;
+    el.textContent = text;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    return el;
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || send.disabled) return;
+    input.value = '';
+    bubble('user', text);
+    history.push({ role: 'user', content: text });
+    send.disabled = true;
+    const out = bubble('assistant', '…');
+    let reply = '';
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Bir hata oluştu, lütfen tekrar deneyin.');
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        reply += decoder.decode(value, { stream: true });
+        out.textContent = reply;
+        log.scrollTop = log.scrollHeight;
+      }
+      if (reply.trim()) history.push({ role: 'assistant', content: reply });
+      else { out.textContent = 'Yanıt alınamadı, lütfen tekrar deneyin.'; history.pop(); }
+    } catch (err) {
+      out.textContent = err.message || 'Bir hata oluştu, lütfen tekrar deneyin.';
+      history.pop();
+    } finally {
+      send.disabled = false;
+      input.focus();
+    }
+  });
+})();
+</script>
 <footer><div class="wrap">© 2026 OzTech · Öz Teknoloji · <a href="gizlilik.html">Gizlilik Politikası</a><br>OzTech, Özgür Can Özcan'a (Özcanlar Yemek Salonu) ait dijital hizmetler markasıdır. Fatih Mah., Atatürk Blv. No: 141/D, 35700 Bergama / İzmir</div></footer>
 </body>
 </html>
